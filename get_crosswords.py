@@ -4,13 +4,18 @@ from lxml import etree
 from StringIO import StringIO
 import logging
 import sys
+from ConfigParser import ConfigParser
+from os import path
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stderr, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 log = logging.getLogger("get_crosswords")
 
 log.debug("Get configuration from .rc file.")
-email = "username"
-password = "password"
+config = ConfigParser({"directory" : "~/Documents/crosswords"})
+config.read(path.expanduser("~/.get_crosswords.rc"))
+email = config.get("Credentials", "email")
+password = config.get("Credentials", "password")
+output_dir = path.expanduser(config.get("Output", "directory"))
 
 log.debug("Get the login page.")
 br = mechanize.Browser()
@@ -23,7 +28,7 @@ response.set_data(etree.tostring(tree.getroot(),
                   pretty_print=True, method="html"))
 br.set_response(response)
 
-log.debug("Set the login name and password and submit the login form.")
+log.debug("Log in as user '" + email + "'.")
 br.select_form(name="login")
 br["loginDetails[email]"] = email
 br["loginDetails[password]"] = password
@@ -45,11 +50,11 @@ log.info("Cryptic puzzle '" + cryptic_title + "' is at '" + cryptic_link + "'.")
 
 log.debug("Write the puzzles out to local files.")
 response = br.open(quick_link)
-quick = open(quick_title + ".html", "w")
+quick = open(path.join(output_dir, quick_title + ".html"), "w")
 quick.write(response.get_data())
 quick.close()
 response = br.open(cryptic_link)
-cryptic = open(cryptic_title + ".html", "w")
+cryptic = open(path.join(output_dir, cryptic_title + ".html"), "w")
 cryptic.write(response.get_data())
 cryptic.close()
 
