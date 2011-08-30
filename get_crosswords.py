@@ -36,7 +36,6 @@ response = br.submit()
 
 log.debug("Parse the page and extract the puzzle links.")
 tree = etree.parse(StringIO(response.get_data()), parser)
-tree.xpath("//div[@id='latest_games']")
 quick_title = tree.xpath("//div[@id='latest_games']//p[starts-with(text(), " +
                          "'QUICK')]/text()")[0]
 quick_link = tree.xpath("//div[@id='latest_games']//p[starts-with(text(), " +
