@@ -1,0 +1,36 @@
+body
+{
+  background-color:#d0e4fe;
+}
+.crossword {
+  border:1px solid black;
+  border-collapse:collapse;
+}
+td {
+  width:30px;
+  height:30px;
+}
+.selected {
+  background-color:yellow;
+}
+div.number {
+  position:relative;
+}
+span.number {
+  position:absolute;
+  left:0px;
+  top:0px;
+  z-index:1;
+  text-align:left;
+  font-size:10px;
+}
+input {
+  width:30px;
+  height:30px;
+  border:none;
+  text-align:center;
+  text-transform: uppercase;
+}
+td.black {
+  background-color:#000000;
+}
