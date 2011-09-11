@@ -6,6 +6,7 @@ import logging
 import sys
 from ConfigParser import ConfigParser
 from os import path
+import re
 
 """ Globals """
 
@@ -26,12 +27,19 @@ def login():
     return response
 
 def convert_crossword(tree):
-    #output = ""
-    #for row in tree.xpath("//table[2]//tr[2]//table//tr"):
-    #    for image in row.xpath(".//img/@src"):
-    #        image = image.replace("/_admin/printing/images/", "")
+    """
+       Convert the Telegraph crossword HTML into a form suitable for offline
+       solving.
+       Input: An lxml etree object containing the Telegraph format HTML.
+       Output: An lxml etree object containing the local form.
+    """
+    for row in tree.xpath("//table[2]//tr[2]//table//tr"):
+        for image in row.xpath(".//img/@src"):
+            image = re.sub(r'^/_admin/printing/images/(.*\D)\d*.gif$', r'\1', image)
+	    if image == "black_cell":
+
     #return etree.parse(StringIO(output), parser)
-    return tree
+    return tree;
 
 def load_file(title):
     """Load a previously saved XHTML file, and build the parse tree """
