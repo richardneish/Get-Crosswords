@@ -27,15 +27,23 @@ def login():
 
 def convert_crossword(tree):
     grid = []
-    for row in tree.xpath("//table[2]//tr[2]//table//tr"):
-        for image in row.xpath(".//img/@src"):
-            cell_type = re.match('^/_admin/printing/images/(.*\D)\d?\.gif$', image).groups()[0]
-            if cell_type == 'white_cell':
+    rows = tree.xpath("//table[2]//tr[2]//table//tr")
+    gridheight = len(rows)
+    for row in rows:
+        images = row.xpath(".//img/@src")
+        gridwidth = len(images)
+        for image in :
+            try:
+                cell = re.match(r'^/_admin/printing/images/(.*\D)\d?\.gif$', image),group(1)
+            except:
+                log.error('Could not parse image src ' + image)
+                cell = 'black_cell'
+            if cell == 'white_cell':
                 grid.append(' ')
-            else if cell_type == 'black_cell':
+            else if cell == 'black_cell':
                 grid.append('.')
             else if num_match = re.match('^(\d+)_number$'):
-                grid.append(num_match.groups()[0]
+                grid.append(num_match.group(1))
     return tree
 
 def load_file(title):
