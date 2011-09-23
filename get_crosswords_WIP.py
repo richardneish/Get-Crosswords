@@ -36,7 +36,10 @@ def convert_crossword(tree):
     return tree
 
 def extract_grid(tree):
-    """ Extract the crossword grid from HTML """
+    """
+       Extract the crossword grid and grid numbers from HTML.
+       Returns the tuple (grid, gridnums).
+    """
     grid = []
     rows = tree.xpath("//table[2]//tr[2]//table//tr")
     gridheight = len(rows)
@@ -52,6 +55,7 @@ def extract_grid(tree):
             except:
                 log.error('Could not parse image src [' + image + ']')
                 cell = 'black_cell'
+            gridnum = 0
             if cell == 'white_cell':
                 grid.append(' ')
             elif cell == 'black_cell':
@@ -59,8 +63,25 @@ def extract_grid(tree):
             else:
                 num_match = re.match(r'^(\d+)_number$', cell)
                 if num_match != None:
-                    grid.append(num_match.group(1))
-    return grid
+                    gridnum = num_match.group(1)
+                    grid.append(' ')
+            gridnums.append(gridnum)
+    return grid, gridnums
+
+def extract_clues(tree):
+    """ Extract the crossword clues from HTML """
+    def helper(clues_in):
+        clues_out = []
+        for clue in clues_in:
+            (clue_num, clue_text) = clue.xpath('.//text()')
+            clues_out.append(clue_num + '. ' + clue_text)
+        return clues_out
+    clues = {}
+    across_clues = tree.xpath('//table[3]//td[2]//tr')
+    clues['across'] = helper(across_clues)
+    down_clues = tree.xpath('//table[3]//td[4]//tr')
+    clues['down'] = helper(down_clues)
+    return clues
 
 def load_file(title):
     """Load a previously saved XHTML file, and build the parse tree """
