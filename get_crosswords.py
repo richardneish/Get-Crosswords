@@ -6,6 +6,7 @@ import logging
 import sys
 from ConfigParser import ConfigParser
 from os import path
+import re
 
 """ Globals """
 
@@ -26,12 +27,40 @@ def login():
     return response
 
 def convert_crossword(tree):
-    #output = ""
-    #for row in tree.xpath("//table[2]//tr[2]//table//tr"):
-    #    for image in row.xpath(".//img/@src"):
-    #        image = image.replace("/_admin/printing/images/", "")
-    #return etree.parse(StringIO(output), parser)
+    """
+       Convert the Telegraph crossword HTML into a form suitable for offline
+       solving.
+       Input: An lxml etree object containing the Telegraph format HTML.
+       Output: An lxml etree object containing the local form.
+    """
     return tree
+
+def extract_grid(tree):
+    """ Extract the crossword grid from HTML """
+    grid = []
+    rows = tree.xpath("//table[2]//tr[2]//table//tr")
+    gridheight = len(rows)
+    gridwidth = None
+    for row in rows:
+        images = row.xpath(".//img/@src")
+        if gridwidth == None:
+            gridwidth = len(images)
+        for image in images:
+            try:
+                cell = re.match(r'^/_admin/printing/images/(.*\D)\d*\.gif$', \
+                                image).group(1)
+            except:
+                log.error('Could not parse image src [' + image + ']')
+                cell = 'black_cell'
+            if cell == 'white_cell':
+                grid.append(' ')
+            elif cell == 'black_cell':
+                grid.append('.')
+            else:
+                num_match = re.match(r'^(\d+)_number$', cell)
+                if num_match != None:
+                    grid.append(num_match.group(1))
+    return grid
 
 def load_file(title):
     """Load a previously saved XHTML file, and build the parse tree """
