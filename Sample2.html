@@ -1,0 +1,129 @@
+<html><!-- This page of sample code is intended to demonstrate how to use the JSON puzzle format described at www.xwordinfo.com.
+It can be freely used but please credit Jim Horne and xwordinfo.com and let me know if you end up using it.
+Email info {at} xwordinfo.com  --><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Sample 2 - show puzzle using JSONP and jQuery</title>
+    <style type="text/css">
+        body { font-family:Tahoma, Helvetica, Sans-Serif; padding-left:20px; background-color:#f6f6f6; font-size:14px; }
+        h2 { color:#00008B; }
+        a { color:#0c519f; text-decoration:none; }
+        a:hover { color:#cc0000; text-decoration:underline; }
+        .links { margin-bottom:20px; font-size:12px; }
+        #puzNotepad { background-color: #ffffe0; width:800px; padding:4px; border:1px solid #808080; margin-bottom:8px; display:none; }
+        #puzTable { border-collapse:collapse; }
+        #puzTable td { width:26px;  text-align:center; font-size:12px; border:1px solid #000000; background-color:White; }
+        #puzTable .black { background-color:Black; }
+        #puzTable .circle { background-color:yellow; }
+        .grid { font-size:8px; text-align:left; padding-left:1px; height:9px}
+        .letter { height:17px; vertical-align:baseline; font-weight:bold; }
+        .copy {  font-size:11px; color:#303030; font-style:italic; margin-top:2px; }
+        .clue { float:left; background-color:#ffffff; padding: 8px; border: 1px solid #00008B; margin: 20px 20px 20px 0px; width:380px; font-size:12px; display:none; }
+        .cluehead { font-size:18px; background-color: #87CEFA; font-weight:bold; padding:4px; margin-bottom: 20px; border:1px solid #808080; text-align:center; letter-spacing:2px; }
+    </style>
+    <script type="text/javascript" src="Sample2_files/jquery-1.js"></script>
+    <script type="text/javascript">
+
+        // This function is called in response to either button click
+
+        function LoadPuzzle(date) {
+
+            // clear out old text fields
+
+            $('#puzNotepad, .clue').hide();
+            $('#puzAuthor, #puzCopy, #across, #down').html('');
+            $('#puzTitle').html('Fetching data...');
+
+            // delete old table
+
+            var tbl = $('#puzTable')[0];
+            var n = tbl.rows.length;
+            while (n > 0)
+                tbl.deleteRow(--n);
+
+            // make the JSONP call and send result to ShowPuzzle()
+
+            // $.getJSON("http://www.xwordinfo.com/JSON/Data.aspx?date=" + date + "&callback=?", ShowPuzzle);
+            var json = '{"gridnums": [0, "1", 0, "2", 0, "3", 0, "4", 0, "5", 0, "6", 0, "7", 0, 0, 0, 0, "8", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "9", 0, 0, 0, 0, 0, 0, 0, 0, "10", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "11", "12", 0, 0, 0, 0, 0, "13", 0, "14", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "15", 0, 0, 0, 0, "16", 0, "17", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "18", 0, 0, "19", 0, "20", 0, 0, 0, 0, 0, "21", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "22", 0, 0, 0, 0, 0, 0, 0, 0, "23", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "size": {"rows": 13, "cols": 13}, "grid": [".", " ", ".", " ", ".", " ", ".", " ", ".", " ", ".", " ", ".", " ", " ", " ", " ", ".", " ", " ", " ", " ", " ", " ", " ", " ", ".", " ", ".", " ", ".", " ", ".", " ", ".", " ", ".", " ", ".", " ", " ", " ", " ", " ", " ", " ", " ", ".", " ", " ", " ", " ", ".", ".", ".", " ", ".", " ", ".", " ", ".", ".", ".", " ", ".", " ", " ", " ", " ", " ", " ", ".", " ", " ", " ", " ", " ", " ", ".", " ", ".", " ", ".", ".", ".", ".", ".", " ", ".", " ", ".", " ", " ", " ", " ", " ", " ", ".", " ", " ", " ", " ", " ", " ", ".", " ", ".", ".", ".", " ", ".", " ", ".", " ", ".", ".", ".", " ", " ", " ", " ", ".", " ", " ", " ", " ", " ", " ", " ", " ", ".", " ", ".", " ", ".", " ", ".", " ", ".", " ", ".", " ", ".", " ", " ", " ", " ", " ", " ", " ", " ", ".", " ", " ", " ", " ", ".", " ", ".", " ", ".", " ", ".", " ", ".", " ", ".", " ", "."], "clues": {"down": ["1. Tributary of the Rhine (4)", "2. Bread with a filling (8)", "3. Large wheeled gun (6)", "4. Stretch (6)", "5. Male deer (4)", "6. Second-largest ocean (8)", "12. Precious metal (8)", "14. Earlier (8)", "16. Habit, routine (6)", "17. Culpable (6)", "19. Large town (4)", "21. Elevated (4)"], "across": ["7. Large brass instrument (4)", "8. Desire for food (8)", "9. Common sense (8)", "10. Ruminant mammal (4)", "11. Choice (6)", "13. Second-in-command (6)", "15. Congregate (6)", "17. European country (6)", "18. Atomic number 30 (4)", "20. Dusk (8)", "22. Deduct (8)", "23. Encourage (4)"]}, "title": "QUICK - No. 171"}';
+            ShowPuzzle(json);
+        }
+
+        // the JSON puzzle object is passed as a parameter
+
+        function ShowPuzzle(puzzle) {
+
+            // Fill in text fields
+
+            $('#puzTitle').html(puzzle.title);
+            $('#puzAuthor').html('by ' + puzzle.author);
+            $('#puzCopy').html('&copy; ' + puzzle.copyright);
+
+            if (puzzle.notepad != null)
+                $('#puzNotepad').show().html('<b>Notepad:</b> ' + puzzle.notepad);
+
+            // Create the puzzle dynamically and fill in grid numbers and answers
+
+            var pt = $('#puzTable')[0];
+            var n = 0;
+            var i = 0;
+
+            for (var row = 0; row < puzzle.size.rows; row++) {
+                var thisrow = pt.insertRow(row);
+                for (var col = 0; col < puzzle.size.cols; col++) {
+                    var cell = thisrow.insertCell(col);
+                    var grid = puzzle.gridnums[n];
+                    if (grid == 0)                      // 0 means no grid number at this location
+                        grid = " ";
+                    var val = puzzle.grid[n];
+                    if (val == '.')
+                        cell.className = "black";
+                    else {
+                        cell.innerHTML = "<div class='grid'>" + grid + "</div>" + "<div class='letter'>" + val + "</div>";
+                        if (puzzle.circles != null && puzzle.circles[n] == 1)
+                            cell.className = "circle";
+                    }
+                    n++;
+                }
+            }
+
+            // Fill in clues
+
+            $('.clue').show();
+
+            for (i in puzzle.clues.across)
+                $('#across').append(puzzle.clues.across[i] + "<br />");
+
+            for (i in puzzle.clues.down)
+                $('#down').append(puzzle.clues.down[i] + "<br />");
+        }
+    </script>
+</head>
+
+<body>
+    <div class="links"><a href="http://www.xwordinfo.com/Default.aspx">XWord Info home</a> |
+    <a href="http://www.xwordinfo.com/JSON/Default.aspx">JSON home</a> |
+    <a href="http://www.xwordinfo.com/JSON/Sample1">Sample 1: JSON and AJAX</a> |
+    <a href="http://www.xwordinfo.com/JSON/Sample3">Sample 3: add a grid to any blog or web page</a></div>
+    
+    <h1>Sample 2 -- JSONP with jQuery</h1>
+    <h2>Completely self-contained client-side-only example</h2>
+    <p style="width:800px">This page is similar to the first sample but with two 
+        important differences: it uses the public jQuery library to simplify the 
+        JavaScript (in particular the AJAX call) and it uses JSONP (JSON with Padding) 
+        which allows access from any domain.</p>
+    <p style="width:800px">In other words, you can View Source, and then copy this 
+        entire page to your own website where it will just work. No changes to the 
+        client code are required and there is no need for any server code at all.</p>
+    <p>See <a href="http://www.xwordinfo.com/JSON/Sample3">Sample 3</a> for an even easier way to add grids to any blog or website.</p>
+    <button id="recent" onclick="LoadPuzzle('recent')">Current Puzzle</button> &nbsp;
+    <button id="random" onclick="LoadPuzzle('random')">Random Puzzle</button>
+
+    <h2 id="puzTitle">NY Times, Sat, Sep 24, 2011</h2>
+    <p id="puzAuthor">by Jeremy Horwitz</p>
+    <div style="display: none;" id="puzNotepad"></div>
+    <table id="puzTable" cellpadding="0" cellspacing="0"><tbody><tr><td><div class="grid">1</div><div class="letter">H</div></td><td><div class="grid">2</div><div class="letter">E</div></td><td><div class="grid">3</div><div class="letter">A</div></td><td><div class="grid">4</div><div class="letter">D</div></td><td><div class="grid">5</div><div class="letter">L</div></td><td><div class="grid">6</div><div class="letter">A</div></td><td><div class="grid">7</div><div class="letter">M</div></td><td><div class="grid">8</div><div class="letter">P</div></td><td class="black"></td><td><div class="grid">9</div><div class="letter">P</div></td><td><div class="grid">10</div><div class="letter">R</div></td><td><div class="grid">11</div><div class="letter">E</div></td><td><div class="grid">12</div><div class="letter">F</div></td><td><div class="grid">13</div><div class="letter">E</div></td><td><div class="grid">14</div><div class="letter">R</div></td></tr><tr><td><div class="grid">15</div><div class="letter">E</div></td><td><div class="grid"> </div><div class="letter">N</div></td><td><div class="grid"> </div><div class="letter">D</div></td><td><div class="grid"> </div><div class="letter">E</div></td><td><div class="grid"> </div><div class="letter">A</div></td><td><div class="grid"> </div><div class="letter">V</div></td><td><div class="grid"> </div><div class="letter">O</div></td><td><div class="grid"> </div><div class="letter">R</div></td><td class="black"></td><td><div class="grid">16</div><div class="letter">L</div></td><td><div class="grid"> </div><div class="letter">O</div></td><td><div class="grid"> </div><div class="letter">C</div></td><td><div class="grid"> </div><div class="letter">A</div></td><td><div class="grid"> </div><div class="letter">L</div></td><td><div class="grid"> </div><div class="letter">E</div></td></tr><tr><td><div class="grid">17</div><div class="letter">P</div></td><td><div class="grid"> </div><div class="letter">O</div></td><td><div class="grid"> </div><div class="letter">S</div></td><td><div class="grid"> </div><div class="letter">I</div></td><td><div class="grid"> </div><div class="letter">T</div></td><td><div class="grid"> </div><div class="letter">I</div></td><td><div class="grid"> </div><div class="letter">V</div></td><td><div class="grid"> </div><div class="letter">E</div></td><td class="black"></td><td><div class="grid">18</div><div class="letter">A</div></td><td><div class="grid"> </div><div class="letter">T</div></td><td><div class="grid"> </div><div class="letter">O</div></td><td><div class="grid"> </div><div class="letter">L</div></td><td><div class="grid"> </div><div class="letter">L</div></td><td><div class="grid"> </div><div class="letter">S</div></td></tr><tr><td class="black"></td><td class="black"></td><td class="black"></td><td><div class="grid">19</div><div class="letter">M</div></td><td><div class="grid"> </div><div class="letter">E</div></td><td><div class="grid"> </div><div class="letter">D</div></td><td><div class="grid"> </div><div class="letter">I</div></td><td><div class="grid"> </div><div class="letter">T</div></td><td><div class="grid">20</div><div class="letter">A</div></td><td><div class="grid"> </div><div class="letter">T</div></td><td><div class="grid"> </div><div class="letter">E</div></td><td class="black"></td><td><div class="grid">21</div><div class="letter">S</div></td><td><div class="grid"> </div><div class="letter">E</div></td><td><div class="grid"> </div><div class="letter">E</div></td></tr><tr><td><div class="grid">22</div><div class="letter">P</div></td><td><div class="grid">23</div><div class="letter">O</div></td><td><div class="grid">24</div><div class="letter">B</div></td><td><div class="grid"> </div><div class="letter">O</div></td><td><div class="grid"> </div><div class="letter">X</div></td><td class="black"></td><td><div class="grid">25</div><div class="letter">E</div></td><td><div class="grid"> </div><div class="letter">E</div></td><td><div class="grid"> </div><div class="letter">R</div></td><td><div class="grid"> </div><div class="letter">O</div></td><td class="black"></td><td><div class="grid">26</div><div class="letter">S</div></td><td><div class="grid"> </div><div class="letter">E</div></td><td><div class="grid"> </div><div class="letter">N</div></td><td><div class="grid"> </div><div class="letter">T</div></td></tr><tr><td><div class="grid">27</div><div class="letter">E</div></td><td><div class="grid"> </div><div class="letter">V</div></td><td><div class="grid"> </div><div class="letter">A</div></td><td><div class="grid"> </div><div class="letter">S</div></td><td class="black"></td><td><div class="grid">28</div><div class="letter">S</div></td><td><div class="grid"> </div><div class="letter">T</div></td><td><div class="grid"> </div><div class="letter">E</div></td><td><div class="grid"> </div><div class="letter">T</div></td><td class="black"></td><td><div class="grid">29</div><div class="letter">S</div></td><td><div class="grid"> </div><div class="letter">I</div></td><td><div class="grid"> </div><div class="letter">C</div></td><td class="black"></td><td class="black"></td></tr><tr><td><div class="grid">30</div><div class="letter">N</div></td><td><div class="grid"> </div><div class="letter">I</div></td><td><div class="grid"> </div><div class="letter">B</div></td><td class="black"></td><td><div class="grid">31</div><div class="letter">J</div></td><td><div class="grid"> </div><div class="letter">O</div></td><td><div class="grid"> </div><div class="letter">H</div></td><td><div class="grid"> </div><div class="letter">N</div></td><td><div class="grid"> </div><div class="letter">G</div></td><td><div class="grid">32</div><div class="letter">R</div></td><td><div class="grid"> </div><div class="letter">I</div></td><td><div class="grid"> </div><div class="letter">S</div></td><td><div class="grid"> </div><div class="letter">H</div></td><td><div class="grid">33</div><div class="letter">A</div></td><td><div class="grid">34</div><div class="letter">M</div></td></tr><tr><td><div class="grid">35</div><div class="letter">A</div></td><td><div class="grid"> </div><div class="letter">N</div></td><td><div class="grid"> </div><div class="letter">Y</div></td><td><div class="grid">36</div><div class="letter">T</div></td><td><div class="grid"> </div><div class="letter">I</div></td><td><div class="grid"> </div><div class="letter">M</div></td><td><div class="grid"> </div><div class="letter">E</div></td><td class="black"></td><td><div class="grid">37</div><div class="letter">A</div></td><td><div class="grid"> </div><div class="letter">E</div></td><td><div class="grid"> </div><div class="letter">R</div></td><td><div class="grid"> </div><div class="letter">I</div></td><td><div class="grid"> </div><div class="letter">A</div></td><td><div class="grid"> </div><div class="letter">L</div></td><td><div class="grid"> </div><div class="letter">S</div></td></tr><tr><td><div class="grid">38</div><div class="letter">L</div></td><td><div class="grid"> </div><div class="letter">E</div></td><td><div class="grid"> </div><div class="letter">G</div></td><td><div class="grid"> </div><div class="letter">A</div></td><td><div class="grid"> </div><div class="letter">L</div></td><td><div class="grid"> </div><div class="letter">E</div></td><td><div class="grid"> </div><div class="letter">A</div></td><td><div class="grid">39</div><div class="letter">G</div></td><td><div class="grid"> </div><div class="letter">L</div></td><td><div class="grid"> </div><div class="letter">E</div></td><td><div class="grid"> </div><div class="letter">S</div></td><td class="black"></td><td><div class="grid">40</div><div class="letter">R</div></td><td><div class="grid"> </div><div class="letter">I</div></td><td><div class="grid"> </div><div class="letter">D</div></td></tr><tr><td class="black"></td><td class="black"></td><td><div class="grid">41</div><div class="letter">O</div></td><td><div class="grid"> </div><div class="letter">U</div></td><td><div class="grid"> </div><div class="letter">T</div></td><td class="black"></td><td><div class="grid">42</div><div class="letter">T</div></td><td><div class="grid"> </div><div class="letter">A</div></td><td><div class="grid"> </div><div class="letter">L</div></td><td><div class="grid"> </div><div class="letter">K</div></td><td class="black"></td><td><div class="grid">43</div><div class="letter">E</div></td><td><div class="grid"> </div><div class="letter">G</div></td><td><div class="grid"> </div><div class="letter">G</div></td><td><div class="grid"> </div><div class="letter">O</div></td></tr><tr><td><div class="grid">44</div><div class="letter">B</div></td><td><div class="grid">45</div><div class="letter">A</div></td><td><div class="grid"> </div><div class="letter">T</div></td><td><div class="grid"> </div><div class="letter">S</div></td><td class="black"></td><td><div class="grid">46</div><div class="letter">G</div></td><td><div class="grid"> </div><div class="letter">E</div></td><td><div class="grid"> </div><div class="letter">N</div></td><td><div class="grid"> </div><div class="letter">E</div></td><td class="black"></td><td><div class="grid">47</div><div class="letter">O</div></td><td><div class="grid"> </div><div class="letter">V</div></td><td><div class="grid"> </div><div class="letter">E</div></td><td><div class="grid"> </div><div class="letter">N</div></td><td><div class="grid"> </div><div class="letter">S</div></td></tr><tr><td><div class="grid">48</div><div class="letter">O</div></td><td><div class="grid"> </div><div class="letter">R</div></td><td><div class="grid"> </div><div class="letter">B</div></td><td class="black"></td><td><div class="grid">49</div><div class="letter">H</div></td><td><div class="grid"> </div><div class="letter">E</div></td><td><div class="grid"> </div><div class="letter">R</div></td><td><div class="grid"> </div><div class="letter">G</div></td><td><div class="grid"> </div><div class="letter">R</div></td><td><div class="grid">50</div><div class="letter">A</div></td><td><div class="grid"> </div><div class="letter">C</div></td><td><div class="grid"> </div><div class="letter">E</div></td><td class="black"></td><td class="black"></td><td class="black"></td></tr><tr><td><div class="grid">51</div><div class="letter">S</div></td><td><div class="grid"> </div><div class="letter">L</div></td><td><div class="grid"> </div><div class="letter">A</div></td><td><div class="grid">52</div><div class="letter">P</div></td><td><div class="grid"> </div><div class="letter">O</div></td><td><div class="grid"> </div><div class="letter">N</div></td><td class="black"></td><td><div class="grid">53</div><div class="letter">S</div></td><td><div class="grid"> </div><div class="letter">I</div></td><td><div class="grid"> </div><div class="letter">T</div></td><td><div class="grid"> </div><div class="letter">U</div></td><td><div class="grid"> </div><div class="letter">N</div></td><td><div class="grid">54</div><div class="letter">D</div></td><td><div class="grid">55</div><div class="letter">E</div></td><td><div class="grid">56</div><div class="letter">R</div></td></tr><tr><td><div class="grid">57</div><div class="letter">S</div></td><td><div class="grid"> </div><div class="letter">E</div></td><td><div class="grid"> </div><div class="letter">C</div></td><td><div class="grid"> </div><div class="letter">A</div></td><td><div class="grid"> </div><div class="letter">N</div></td><td><div class="grid"> </div><div class="letter">T</div></td><td class="black"></td><td><div class="grid">58</div><div class="letter">T</div></td><td><div class="grid"> </div><div class="letter">E</div></td><td><div class="grid"> </div><div class="letter">A</div></td><td><div class="grid"> </div><div class="letter">L</div></td><td><div class="grid"> </div><div class="letter">E</div></td><td><div class="grid"> </div><div class="letter">O</div></td><td><div class="grid"> </div><div class="letter">N</div></td><td><div class="grid"> </div><div class="letter">I</div></td></tr><tr><td><div class="grid">59</div><div class="letter">A</div></td><td><div class="grid"> </div><div class="letter">N</div></td><td><div class="grid"> </div><div class="letter">K</div></td><td><div class="grid"> </div><div class="letter">L</div></td><td><div class="grid"> </div><div class="letter">E</div></td><td><div class="grid"> </div><div class="letter">S</div></td><td class="black"></td><td><div class="grid">60</div><div class="letter">A</div></td><td><div class="grid"> </div><div class="letter">S</div></td><td><div class="grid"> </div><div class="letter">P</div></td><td><div class="grid"> </div><div class="letter">I</div></td><td><div class="grid"> </div><div class="letter">R</div></td><td><div class="grid"> </div><div class="letter">E</div></td><td><div class="grid"> </div><div class="letter">T</div></td><td><div class="grid"> </div><div class="letter">O</div></td></tr></tbody></table>
+    <div id="puzCopy" class="copy">© 2011, The New York Times</div>
+    <div style="display: block;" class="clue"><div class="cluehead">Across</div><div id="across">1. Bit of miner's gear<br>9. Go for first<br>15. Take pains<br>16. Where it's at<br>17. Upbeat<br>18. Much of Micronesia<br>19. Use a Zen garden<br>21. Gloating cry<br>22. Disallowed FedEx destination<br>25. ___ Aarnio, innovative furniture designer<br>26. Put on cloud nine<br>27. Spacewalks and moonwalks, briefly<br>28. Put back in order?<br>29. Direction for a boxer<br>30. Tip for a writer<br>31. Creator of many 38-Across<br>35. Response to "Thanks so much"<br>37. Once-common urban skyline sights<br>38. Many 31-Across characters<br>40. Free<br>41. See 42-Across<br>42. With 41-Across, discuss<br>43. Kellogg's brand<br>44. Wrigley sticks?<br>46. Characteristic governor<br>47. Bakers' dozen, maybe?<br>48. Mars, e.g.<br>49. Title for Wallis Simpson<br>51. Opening for the wrist or the back?<br>53. Attend the lectures of<br>57. Curve-cutting line<br>58. She played Jane in "Fun With Dick and Jane," 2005<br>59. Where traditional bloomers gather<br>60. Aim for<br></div></div>
+    <div style="display: block;" class="clue"><div class="cluehead">Down</div><div id="down">1. Cool, once<br>2. "Warszawa" instrumentalist<br>3. Much e-mail<br>4. Martian moon<br>5. Glove material<br>6. Like noisy fans<br>7. Place to witness a big scene?<br>8. What a bar mitzvah recently was<br>9. "Apology" author<br>10. Drills that can bore<br>11. Conscious beginning?<br>12. Bum rap<br>13. Astronaut Ochoa<br>14. Fix, as ribs?<br>20. Nude showers?<br>22. Kind of code<br>23. Like ones that are fleeced<br>24. Bum rap?<br>26. Aye-aye relative?<br>28. Certain<br>29. Sean Connery and Roger Moore, e.g.<br>31. End it with suddenly<br>32. Be mephitic<br>33. Associate (with)<br>34. Kind of PC command<br>36. Certain crosses<br>39. Ice-T or Ice Cube persona<br>43. Plane, e.g.<br>44. Nova preceder<br>45. Composer nominated for an Oscar for "Blues in the Night"<br>46. Lavatory label<br>47. Circular windows<br>49. Make more efficient<br>50. "___ at the pane": Robert Browning<br>52. Mate<br>54. ___-eyed<br>55. Fictional creature whose name is Old English for "giant"<br>56. Museu do Índio site<br></div></div>
+    <br style="clear:both">
+
+</body></html>
