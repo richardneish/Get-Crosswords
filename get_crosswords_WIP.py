@@ -73,8 +73,10 @@ def extract_clues(tree):
     def helper(clues_in):
         clues_out = []
         for clue in clues_in:
-            (clue_num, clue_text) = clue.xpath('.//text()')
-            clues_out.append(clue_num + '. ' + clue_text)
+            clue_split = clue.xpath('.//text()')
+            if len(clue_split) == 2:
+                (clue_num, clue_text) = clue_split
+                clues_out.append(clue_num + '. ' + clue_text)
         return clues_out
     clues = {}
     across_clues = tree.xpath('//table[3]//td[2]//tr')
