@@ -7,6 +7,7 @@ import sys
 from ConfigParser import ConfigParser
 from os import path
 import re
+import json
 
 """ Globals """
 
@@ -41,6 +42,7 @@ def extract_grid(tree):
        Returns the tuple (grid, gridnums).
     """
     grid = []
+    gridnums = []
     rows = tree.xpath("//table[2]//tr[2]//table//tr")
     gridheight = len(rows)
     gridwidth = None
@@ -66,24 +68,32 @@ def extract_grid(tree):
                     gridnum = num_match.group(1)
                     grid.append(' ')
             gridnums.append(gridnum)
-    return grid, gridnums
+    return gridheight, gridwidth, grid, gridnums
 
-def extract_clues(tree):
+def extract_clues(clues_in):
     """ Extract the crossword clues from HTML """
-    def helper(clues_in):
-        clues_out = []
-        for clue in clues_in:
-            clue_split = clue.xpath('.//text()')
-            if len(clue_split) == 2:
-                (clue_num, clue_text) = clue_split
-                clues_out.append(clue_num + '. ' + clue_text)
-        return clues_out
-    clues = {}
-    across_clues = tree.xpath('//table[3]//td[2]//tr')
-    clues['across'] = helper(across_clues)
-    down_clues = tree.xpath('//table[3]//td[4]//tr')
-    clues['down'] = helper(down_clues)
-    return clues
+    clues_out = []
+    for clue in clues_in:
+        clue_split = clue.xpath('.//text()')
+        if len(clue_split) == 2:
+            (clue_num, clue_text) = clue_split
+            clues_out.append(clue_num + '. ' + clue_text)
+    return clues_out
+
+def build_json(title, tree):
+    """
+       Convert HTML to JSON format defined at 
+       http://www.xwordinfo.com/JSON/
+    """
+    j = {}
+    j['title'] = title
+    j['size'] = {}
+    (j['size']['rows'], j['size']['cols'], j['grid'], j['gridnums']) = \
+        extract_grid(tree)
+    j['clues'] = {}
+    j['clues']['across'] = extract_clues(tree.xpath('//table[3]//td[2]//tr'))
+    j['clues']['down'] = extract_clues(tree.xpath('//table[3]//td[4]//tr'))
+    return json.dumps(j)
 
 def load_file(title):
     """Load a previously saved XHTML file, and build the parse tree """
