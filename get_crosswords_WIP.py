@@ -34,6 +34,11 @@ def convert_crossword(tree):
        Input: An lxml etree object containing the Telegraph format HTML.
        Output: An lxml etree object containing the local form.
     """
+    file = open(path.join(output_dir, title + ".html"), "r")
+    tree = etree.parse(file, parser)
+    file.close()
+    template_tree = load_file('template')
+    
     return tree
 
 def extract_grid(tree):
