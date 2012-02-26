@@ -6,6 +6,8 @@ import logging
 import sys
 from ConfigParser import ConfigParser
 from os import path
+from datetime import date, timedelta
+import string
 import re
 import json
 
@@ -115,9 +117,11 @@ def save_file(title, tree):
     file.close()
     log.info("Saved '" + filename + "'")
 
-def download_crossword(tree, type):
+def download_crossword(date, type):
     # TODO: Go to http://puzzles.telegraph.co.uk/site/crossword_puzzles_${type}
     # Search for ${date} and follow the link to get crossword and solution.
+    response = br.open('http://puzzles.telegraph.co.uk/site/crossword_puzzles_${type}')
+    tree = etree.parse(StringIO(response.get_data()), parser)
     title = tree.xpath("//div[@id='latest_games']//p[starts-with(text(), " +
                        "'" + type + "')]/text()")[0]
     link = tree.xpath("//div[@id='latest_games']//p[starts-with(text(), " +
@@ -143,15 +147,13 @@ br = mechanize.Browser()
 
 ######## MAIN PROGRAM ######
 if __name__ == "__main__":    
-    response = login()
-    log.debug("Parse the page and extract the puzzle links.")
-    tree = etree.parse(StringIO(response.get_data()), parser)
+    login()
     
-    date = # TODO: Yesterday's date in "ddd DD MMM YY" format eg "Tue 21 Feb 12".
+    tomorrow = date.today() + timedelta(1);
     
     log.debug("Download the puzzles and reparse into the local form.")
-    for type in ["QUICK", "CRYPTIC"]:
-        (title, crossword_tree) = download_crossword(tree, date, type)
+    for type in ["quick", "cryptic"]:
+        (title, crossword_tree) = download_crossword(tomorrow, type)
         save_file(title, crossword_tree)
         local_format = convert_crossword(crossword_tree)
         save_file(title + " (converted)", local_format)
