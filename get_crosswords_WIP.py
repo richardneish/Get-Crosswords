@@ -118,22 +118,33 @@ def save_file(title, tree):
     log.info("Saved '" + filename + "'")
 
 def download_crossword(date, type):
-    # TODO: Go to http://puzzles.telegraph.co.uk/site/crossword_puzzles_${type}
     # Search for ${date} and follow the link to get crossword and solution.
-    response = br.open('http://puzzles.telegraph.co.uk/site/crossword_puzzles_${type}')
+    url = "http://puzzles.telegraph.co.uk/site/view_puzzle.php?action=next&puzzleDate=%04d-%02d-%02d%%2000:00:00&puzzleType=%s&type=" \
+          % (date.year, date.month, date.day, type)
+    response = br.open(url)
     tree = etree.parse(StringIO(response.get_data()), parser)
-    title = tree.xpath("//div[@id='latest_games']//p[starts-with(text(), " +
-                       "'" + type + "')]/text()")[0]
-    link = tree.xpath("//div[@id='latest_games']//p[starts-with(text(), " +
-                      "'" + type + "')]/following-sibling::a[1]/@href")[0]
-    log.info("Downloading puzzle '" + title + "' from '" + link + "'.")
-    response = br.open(link)
+    nodes = tree.xpath(r'//x:div[@class="game_name_bar"]/p[1]//text()')
+    title = nodes[0] + nodes[1]
+    nodes = tree.xpath(r'//div[@class="game_details"]//a/@href')
+    for node in nodes:
+      m = re.match(r'print_crossword\?id=\d+')
+      if m.group(0) != None:
+        puzzle_link = node
+      m = re.match(r'print_crossword.php\?id=\d+&action=solution')
+      if m.group(0) != None:
+        solution_link = node
+    log.info("Downloading puzzle '" + title + "' from '" + puzzle_link + "'.")
+    response = br.open(puzzle_link)
     crossword_tree = etree.parse(StringIO(response.get_data()), parser)
-    return (title, crossword_tree)
+    if solution_link != None:
+      log.info("Downloading solution '" + title + "' from '" + solution_link + "'.")
+      response = br.open(solution_link)
+      solution_tree = etree.parse(StringIO(response.get_data()), parser)
+    return (title, crossword_tree, solution_tree)
 
 ######## MODULE INITIALIZATION ######
 """Configure logging """
-logging.basicConfig(level=logging.DEBUG, stream=sys.stderr, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# logging.basicConfig(level=logging.DEBUG, stream=sys.stderr, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 log = logging.getLogger("get_crosswords")
 
 log.debug("Get configuration from .rc file.")
@@ -149,11 +160,13 @@ br = mechanize.Browser()
 if __name__ == "__main__":    
     login()
     
-    tomorrow = date.today() + timedelta(1);
+    yesterday = date.today() + timedelta(-1)
+    print "Yesterday: %04d-%02d-%02d%%2000:00:00" % (yesterday.year, yesterday.month, yesterday.day)
+    exit()
     
     log.debug("Download the puzzles and reparse into the local form.")
     for type in ["quick", "cryptic"]:
-        (title, crossword_tree) = download_crossword(tomorrow, type)
+        (title, crossword_tree, solution_tree) = download_crossword(yesterday, type)
         save_file(title, crossword_tree)
         local_format = convert_crossword(crossword_tree)
         save_file(title + " (converted)", local_format)
