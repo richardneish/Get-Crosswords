@@ -15,7 +15,7 @@ class TelegraphCrossword:
   
   def __init__(self):
     """Configure logging """
-    logging.basicConfig(level=logging.DEBUG, stream=sys.stderr, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    logging.basicConfig(level=logging.DEBUG, stream=sys.stdout, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     self.log = logging.getLogger("get_crosswords")
 
     # TODO: allow user to pass in path to config file.
@@ -120,17 +120,30 @@ class TelegraphCrossword:
 
   def save(self, title, crossword_tree, solution_tree):
       """Save the parse tree as XHTML """
-      filename = path.join(output_dir, title + ".html")
+      filename = path.join(self.output_dir, title + ".html")
       file = open(filename, "w")
-      file.write(etree.tostring(tree.getroot(), pretty_print=True, method="xml"))
+      file.write(etree.tostring(crossword_tree.getroot(), pretty_print=True, method="xml"))
       file.close()
       self.log.info("Saved '" + filename + "'")
+      if solution_tree != None:
+        filename = path.join(self.output_dir, title + "_solution.html")
+        file = open(filename, "w")
+        file.write(etree.tostring(solution_tree.getroot(), pretty_print=True, method="xml"))
+        file.close()
+        self.log.info("Saved '" + filename + "'")
 
   def download(self, date, type):
       # Search for ${date} and follow the link to get crossword and solution.
       url = "http://puzzles.telegraph.co.uk/site/view_puzzle.php?action=next&puzzleDate=%04d-%02d-%02d%%2000:00:00&puzzleType=%s&type=" \
             % (date.year, date.month, date.day, type)
-      response = self.br.open(url)
+      self.log.debug('Fetching search form')
+      self.br.open('http://puzzles.telegraph.co.uk/site/crossword_puzzles');
+      self.br.select_form(name = 'small_component_search');
+      self.br.form['dayDate'] = date.day;
+      self.br.form['monthDate'] = date.month;
+      self.br.form['yearDate'] = date.year;
+      self.log.debug('Searching for %s puzzle for %d-%d-%d', type, date.year, date.month, date.day);
+      response = self.br.submit();
       tree = etree.parse(StringIO(response.get_data()), self.parser)
       nodes = tree.xpath(r'//div[@class="game_name_bar"]/p[1]//text()')
       title = nodes[0] + nodes[1]
@@ -138,7 +151,9 @@ class TelegraphCrossword:
       puzzle_link = None
       solution_link = None
       for link in nodes:
-        if re.match(r'print_crossword\?id=\d+', link):
+        self.log.debug('Examining link [%s]' % link)
+        if re.match(r'^./print_crossword\?id=\d+$', link):
+          self.log.debug('Found puzzle link [%s]' % link)
           puzzle_link = link
         if re.match(r'print_crossword.php\?id=\d+&action=solution', link):
           solution_link = link
