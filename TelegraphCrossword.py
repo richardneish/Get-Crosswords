@@ -26,7 +26,7 @@ class TelegraphCrossword:
     self.password = config.get("Credentials", "password")
     self.output_dir = path.expanduser(config.get("Output", "directory"))
     self.parser = etree.HTMLParser()
-    self.br = mechanize.Browser()
+    self.br = mechanize.Browser(factory=mechanize.RobustFactory())
 
   def login(self):
     self.log.debug("Get the login page.")
@@ -134,16 +134,15 @@ class TelegraphCrossword:
 
   def download(self, date, type):
       # Search for ${date} and follow the link to get crossword and solution.
-      url = "http://puzzles.telegraph.co.uk/site/view_puzzle.php?action=next&puzzleDate=%04d-%02d-%02d%%2000:00:00&puzzleType=%s&type=" \
-            % (date.year, date.month, date.day, type)
       self.log.debug('Fetching search form')
       self.br.open('http://puzzles.telegraph.co.uk/site/crossword_puzzles');
       self.br.select_form(name = 'small_component_search');
-      self.br.form['dayDate'] = date.day;
-      self.br.form['monthDate'] = date.month;
-      self.br.form['yearDate'] = date.year;
+      self.br['dayDate'] = ["%02d" % date.day];
+      self.br['monthDate'] = ["%02d" % date.month];
+      self.br['yearDate'] = [date.year];
       self.log.debug('Searching for %s puzzle for %d-%d-%d', type, date.year, date.month, date.day);
-      response = self.br.submit();
+      self.br.submit();
+      response = self.br.follow_link(text_regex=re.compile("^%s" % type, re.IGNORECASE))
       tree = etree.parse(StringIO(response.get_data()), self.parser)
       nodes = tree.xpath(r'//div[@class="game_name_bar"]/p[1]//text()')
       title = nodes[0] + nodes[1]
